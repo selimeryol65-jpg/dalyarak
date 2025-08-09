@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ceyda • Mini Aşk Sitesi</title>
+  <meta name="description" content="Ceyda için minik bir aşk sayfası" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>💖</text></svg>">
+  <style>
+    :root{
+      --bg:#fff6fb;
+      --txt:#2a2a2a;
+      --accent:#ff4da6;
+      --accent-2:#7c3aed;
+      --card:#ffffff;
+      --muted:#8a8a8a;
+      --shadow:0 10px 30px rgba(0,0,0,.08);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color:var(--txt); background: radial-gradient(1200px 700px at 10% -10%, #ffe0f0 0%, transparent 60%),
+                           radial-gradient(1000px 600px at 110% 10%, #e7d7ff 0%, transparent 60%), var(--bg);
+      overflow-x:hidden;
+    }
+    .wrap{min-height:100%; display:grid; place-items:center; padding:24px}
+    .card{
+      width:min(680px, 92vw);
+      background:var(--card); border-radius:24px; box-shadow:var(--shadow);
+      padding:28px 24px 24px; text-align:center; position:relative; overflow:hidden;
+    }
+    .title{font-weight:800; letter-spacing:.2px; font-size:clamp(26px, 3.2vw, 36px);}
+    .subtitle{color:var(--muted); margin-top:6px; margin-bottom:22px}
+
+    .btns{display:flex; gap:14px; justify-content:center; flex-wrap:wrap}
+    button{
+      appearance:none; border:0; cursor:pointer; padding:14px 20px; border-radius:14px; font-weight:700;
+      font-size:18px; transition:transform .18s ease, box-shadow .18s ease, background .2s ease, color .2s ease;
+      box-shadow:0 6px 18px rgba(0,0,0,.08);
+    }
+    .yes{
+      background:linear-gradient(135deg, var(--accent), #ff7ac9);
+      color:white;
+    }
+    .no{
+      background:linear-gradient(135deg, #e2e8f0, #f8fafc);
+      color:#111827;
+    }
+    button:hover{transform:translateY(-2px)}
+    button:active{transform:translateY(0)}
+
+    .hint{margin-top:14px; font-size:14px; color:var(--muted)}
+
+    /* full-screen love state */
+    .love-full{
+      position:fixed; inset:0; width:100vw; height:100vh; border-radius:0 !important;
+      display:grid; place-items:center; z-index:30; font-size: clamp(28px, 6vw, 48px);
+      box-shadow:none !important;
+      animation:breathe 1.6s ease-in-out infinite;
+    }
+    @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+
+    /* floating hearts */
+    .hearts{position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:20}
+    .heart{position:absolute; font-size:18px; opacity:.8; animation:floatUp linear forwards}
+    @keyframes floatUp{from{transform:translateY(100vh) translateX(0) rotate(0)} to{transform:translateY(-20vh) translateX(var(--x)) rotate(360deg); opacity:0}}
+
+    /* final screen */
+    .final{
+      position:fixed; inset:0; display:grid; place-items:center; background:
+        radial-gradient(1200px 700px at 10% -10%, #ffe0f0 0%, transparent 60%),
+        radial-gradient(1000px 600px at 110% 10%, #e7d7ff 0%, transparent 60%), var(--bg);
+      z-index:40;
+    }
+    .final-card{
+      text-align:center; background:white; padding:36px 28px; border-radius:24px; box-shadow:var(--shadow);
+      width:min(700px,92vw)
+    }
+    .final-card h2{font-size:clamp(26px, 3.6vw, 44px); margin:0 0 10px}
+    .final-card p{color:var(--muted); margin:0}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" id="card">
+      <div class="title">Ceyda 💖</div>
+      <div class="subtitle">Küçük ama kalpten bir site</div>
+      <div class="btns">
+        <button class="yes" id="yesBtn">Seni seviyorum</button>
+        <button class="no" id="noBtn">Sevmiyorum</button>
+      </div>
+      <div class="hint">"Sevmiyorum"a bastıkça diğer tuşa bir şeyler olacak... 😏</div>
+    </div>
+  </div>
+
+  <div class="hearts" id="hearts" aria-hidden="true"></div>
+
+  <script>
+    const yesBtn = document.getElementById('yesBtn');
+    const noBtn  = document.getElementById('noBtn');
+    const hearts = document.getElementById('hearts');
+
+    let noClicks = 0;
+    let grownToFull = false;
+
+    function sprinkleHearts(count = 12){
+      for(let i=0;i<count;i++){
+        const span = document.createElement('span');
+        span.className = 'heart';
+        span.textContent = ['💖','💕','💘','💗','💞'][Math.floor(Math.random()*5)];
+        span.style.left = Math.random()*100 + 'vw';
+        span.style.setProperty('--x', (Math.random()*60-30)+'vw');
+        span.style.animationDuration = (3 + Math.random()*2) + 's';
+        hearts.appendChild(span);
+        setTimeout(()=>span.remove(), 5000);
+      }
+    }
+
+    noBtn.addEventListener('click', () => {
+      noClicks++;
+      // grow the YES button
+      if(!grownToFull){
+        const scale = 1 + noClicks * 0.35; // progressively larger
+        yesBtn.style.transform = `scale(${scale})`;
+      }
+
+      // after 4 clicks, make YES cover the page
+      if(noClicks >= 4 && !grownToFull){
+        grownToFull = true;
+        // hide NO button for the dramatic effect
+        noBtn.style.opacity = 0;
+        noBtn.style.pointerEvents = 'none';
+
+        // convert YES button to full-screen
+        yesBtn.classList.add('love-full');
+        yesBtn.textContent = 'Seni seviyorum ❤️';
+        sprinkleHearts(24);
+      } else {
+        sprinkleHearts(10);
+      }
+    });
+
+    yesBtn.addEventListener('click', () => {
+      // Show final sweet screen
+      const final = document.createElement('div');
+      final.className = 'final';
+      final.innerHTML = `
+        <div class="final-card">
+          <h2>😊 Biliyordum, teşekkür ederim!</h2>
+          <p>Bu sayfa sadece senin için hazırlandı, Ceyda. 💗</p>
+        </div>`;
+      document.body.appendChild(final);
+      sprinkleHearts(40);
+    });
+  </script>
+</body>
+</html>

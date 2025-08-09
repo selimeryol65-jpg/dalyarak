@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Komik Site – Oyun</title>
+  <meta name="description" content="Komik mini site – oyun sahnesi" />
+  <style>
+    :root{ --txt:#111827; --muted:#6b7280; --card:#ffffff; --shadow:0 10px 30px rgba(0,0,0,.08);
+           --fun1:#fef3c7; --fun2:#d1fae5; --fun3:#e0e7ff; --yes:#60a5fa; }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; color:var(--txt);
+      background: radial-gradient(900px 600px at 0% 0%, var(--fun1), transparent 60%),
+                  radial-gradient(900px 600px at 100% 0%, var(--fun2), transparent 60%),
+                  radial-gradient(900px 600px at 50% 100%, var(--fun3), transparent 60%), #ffffff; overflow-x:hidden;}
+    header{display:flex; justify-content:center; padding:22px}
+    header .name{background:white; padding:10px 16px; border-radius:999px; box-shadow:var(--shadow); font-weight:800}
+    .wrap{min-height:calc(100% - 84px); display:grid; place-items:center; padding:24px}
+    .card{width:min(760px,92vw); background:var(--card); border-radius:24px; box-shadow:var(--shadow); padding:28px 24px; text-align:center; position:relative; overflow:hidden}
+    h2{font-size:clamp(22px,3vw,32px); margin:0 0 12px}
+    p{color:var(--muted); margin:0 0 18px}
+    .btns{display:flex; gap:14px; justify-content:center; flex-wrap:wrap}
+    button{appearance:none; border:0; cursor:pointer; padding:14px 18px; border-radius:14px; font-weight:800; font-size:18px; transition:transform .18s ease, box-shadow .18s ease, background .2s ease, color .2s ease; box-shadow:0 6px 18px rgba(0,0,0,.08)}
+    .yes{background:linear-gradient(135deg, var(--yes), #93c5fd); color:#0b1220}
+    .no{ background:linear-gradient(135deg, #f3f4f6, #ffffff); color:#111827}
+    button:hover{transform:translateY(-2px)}
+    button:active{transform:translateY(0)}
+
+    .full{position:fixed; inset:0; width:100vw; height:100vh; border-radius:0 !important; display:grid; place-items:center; z-index:30; font-size: clamp(28px, 6vw, 48px); box-shadow:none !important; animation:breathe 1.4s ease-in-out infinite}
+    @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+
+    .final{position:fixed; inset:0; display:grid; place-items:center; z-index:40; background:inherit}
+    .final-card{ text-align:center; background:white; padding:36px 28px; border-radius:24px; box-shadow:var(--shadow); width:min(700px,92vw) }
+    .final-card h2{font-size:clamp(26px,3.6vw,44px); margin:0 0 10px}
+    .final-card p{color:var(--muted); margin:0}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="name" id="nameTag">?</div>
+  </header>
+  <div class="wrap">
+    <div class="card">
+      <h2 id="headline"></h2>
+      <p>Hadi dürüst olalım 😏</p>
+      <div class="btns">
+        <button class="yes" id="yes">Dal yaraksın</button>
+        <button class="no" id="no">Dal yarak değilim</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---- helper: read name from URL ----
+    const params = new URLSearchParams(location.search);
+    const rawName = (params.get('name')||'').trim();
+    if(!rawName){ location.replace('index.html'); }
+
+    // güvenli yerleştirme (XSS yok)
+    const safeName = rawName.replace(/[<>]/g,'');
+    const nameTag = document.getElementById('nameTag');
+    const headline = document.getElementById('headline');
+    nameTag.textContent = safeName + ' sen';
+    headline.textContent = safeName + ' sen';
+
+    const yes = document.getElementById('yes');
+    const no = document.getElementById('no');
+
+    let denyClicks = 0;
+    let expanded = false;
+
+    no.addEventListener('click', () => {
+      denyClicks++;
+      if(!expanded){
+        const scale = 1 + denyClicks * 0.35; // her tıklamada büyür
+        yes.style.transform = `scale(${scale})`;
+      }
+      if(denyClicks >= 8 && !expanded){
+        expanded = true;
+        no.style.opacity = 0; no.style.pointerEvents = 'none';
+        yes.classList.add('full');
+        yes.textContent = 'Dal yaraksın ✅';
+      }
+    });
+
+    function finish(){
+      const final = document.createElement('div');
+      final.className = 'final';
+      final.innerHTML = `
+        <div class="final-card">
+          <h2>😌 Biliyordum!</h2>
+          <p>Evet, ${safeName} dalyaraksın.</p>
+        </div>`;
+      document.body.appendChild(final);
+    }
+
+    yes.addEventListener('click', finish);
+  </script>
+</body>
+</html>
